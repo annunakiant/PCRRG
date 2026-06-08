@@ -25,8 +25,8 @@ except ImportError:
     MAIL_AVAILABLE = False
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "dev-secret"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///pcrr_full_app.db"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-in-production")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///pcrr_full_app.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 BASE_DIR = os.path.dirname(__file__)
@@ -35,11 +35,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 if MAIL_AVAILABLE:
-    app.config["MAIL_SERVER"] = "smtp.gmail.com"
-    app.config["MAIL_PORT"] = 587
-    app.config["MAIL_USE_TLS"] = True
-    app.config["MAIL_USERNAME"] = "YOUR_EMAIL@gmail.com"
-    app.config["MAIL_PASSWORD"] = "YOUR_APP_PASSWORD"
+    app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "smtp.gmail.com")
+    app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", 587))
+    app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "true").lower() == "true"
+    app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME", "YOUR_EMAIL@gmail.com")
+    app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD", "YOUR_APP_PASSWORD")
     mail = Mail(app)
 else:
     mail = None
@@ -1257,4 +1257,4 @@ def init_db():
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
