@@ -8,8 +8,8 @@ import requests
 # CONFIG — EDIT THESE TWO VALUES
 # ============================================================
 
-RENDER_API_KEY = os.environ.get("RENDER_API_KEY", "YOUR_RENDER_API_KEY_HERE")
-RENDER_SERVICE_ID = os.environ.get("RENDER_SERVICE_ID", "YOUR_RENDER_SERVICE_ID_HERE")
+RENDER_API_KEY = os.environ.get("RENDER_API_KEY", "rnd_2TQwCloA98FnUqjEDQjdztmyaRaj")
+RENDER_SERVICE_ID = os.environ.get("RENDER_SERVICE_ID", "srv-d8jjmbk2m8qs7395kf00")
 
 PROJECT_NAME = "pcrr_app"
 BUILD_DIR = "build_output"
