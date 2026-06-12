@@ -1,9 +1,0 @@
-{
-  "name": "PCRRG Field Ops",
-  "short_name": "PCRRG",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#4fc3f7",
-  "icons": []
-}
