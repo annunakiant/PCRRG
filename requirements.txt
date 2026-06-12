@@ -1,9 +1,6 @@
-flask
+﻿flask
 flask_sqlalchemy
 flask_login
-reportlab
 flask_mail
-<<<<<<< HEAD
-=======
+reportlab
 gunicorn
->>>>>>> d3d21ed3dd6840fb58db49c5062c440449d3d262
