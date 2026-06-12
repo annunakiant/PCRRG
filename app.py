@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+
 from flask import (
     Flask, render_template, request, redirect,
     url_for, flash, send_file, jsonify
@@ -55,6 +57,11 @@ login_manager.login_view = "login"
 # ---------------------------------------------------------------------
 # MODELS
 # ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# MODELS (explicit foreign_keys to avoid ambiguity)
+# ---------------------------------------------------------------------
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,7 +70,21 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(50), default="contractor")
 
-    jobs = db.relationship("Job", backref="assigned_to", lazy=True)
+    # Explicit relationships: tell SQLAlchemy which FK to use
+    jobs_assigned = db.relationship(
+        "Job",
+        foreign_keys="Job.assigned_to_id",
+        backref="assigned_to_user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
+    jobs_admin = db.relationship(
+        "Job",
+        foreign_keys="Job.admin_id",
+        backref="admin_user",
+        lazy="dynamic",
+        cascade="all, delete-orphan",
+    )
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -83,6 +104,7 @@ class Job(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Two explicit foreign keys to User.id
     admin_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     assigned_to_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
 
@@ -90,6 +112,14 @@ class Job(db.Model):
     photos = db.relationship("Photo", backref="job", lazy=True, cascade="all, delete-orphan")
     contracts = db.relationship("Contract", backref="job", lazy=True, cascade="all, delete-orphan")
 
+    # Backwards-compatible properties so templates using job.assigned_to or job.admin still work
+    @property
+    def assigned_to(self):
+        return getattr(self, "assigned_to_user", None)
+
+    @property
+    def admin(self):
+        return getattr(self, "admin_user", None)
 
 class ChecklistTemplate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -523,3 +553,8 @@ def sign_contract(contract_id):
         contract.signed = True
         contract.signed_at = datetime.utcnow()
         contract.signer_name
+        
+# Serve service worker from site root so browsers can register it at /service-worker.js
+@app.route('/service-worker.js')
+def service_worker():
+    return send_from_directory('static', 'service-worker.js')
