@@ -38,17 +38,12 @@ def ensure(path):
 # ============================================================
 # 1. BUILD PROJECT (NO DELETE, NO CHDIR)
 # ============================================================
-
 def build_project():
     print("\n🔥 BUILD: Rebuilding project folder\n")
 
-    # Always build into a clean build_output folder
-    if os.path.exists(BUILD_DIR):
-        shutil.rmtree(BUILD_DIR)
-
+    # SAFE: Do NOT delete build_output on Windows
     ensure(BUILD_DIR)
 
-    # Create project structure inside build_output/pcrr_app
     project_path = os.path.join(BUILD_DIR, PROJECT_NAME)
     ensure(project_path)
 
@@ -95,18 +90,7 @@ VERSION.txt
   "display": "standalone",
   "background_color": "#111111",
   "theme_color": "#4fc3f7",
-  "icons": [
-    {
-      "src": "/static/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/static/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "icons": []
 }
 """)
 
@@ -121,55 +105,6 @@ self.addEventListener('install', e => {
 self.addEventListener('fetch', e => {
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
-""")
-
-    # Base template
-    write(os.path.join(project_path, "templates/base.html"),
-"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>PCRRG Field Ops</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('{{ url_for('static', filename='service-worker.js') }}');
-      });
-    }
-  </script>
-  <style>
-    body { font-family: system-ui, sans-serif; background:#111; color:#eee; margin:0; }
-    header { background:#222; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
-    a { color:#4fc3f7; text-decoration:none; }
-    .container { padding:20px; }
-    .card { background:#1c1c1c; padding:15px; margin-bottom:15px; border-radius:8px; }
-    input, select, textarea { width:100%; padding:8px; margin:5px 0 10px; border-radius:4px; border:1px solid #444; background:#000; color:#eee; }
-    button { padding:8px 16px; border:none; border-radius:4px; background:#4fc3f7; color:#000; cursor:pointer; }
-    button:hover { background:#81d4fa; }
-  </style>
-</head>
-<body>
-<header>
-  <div><strong>PCRRG Field Ops</strong></div>
-  <div>
-    {% if current_user.is_authenticated %}
-      <span>{{ current_user.name }} ({{ current_user.role }})</span>
-      &nbsp;|&nbsp;
-      <a href="{{ url_for('dashboard') }}">Dashboard</a>
-      &nbsp;|&nbsp;
-      <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
-      <a href="{{ url_for('login') }}">Login</a>
-    {% endif %}
-  </div>
-</header>
-<div class="container">
-  {% block content %}{% endblock %}
-</div>
-</body>
-</html>
 """)
 
     print("✅ Build complete.\n")
