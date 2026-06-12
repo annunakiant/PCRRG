@@ -558,3 +558,28 @@ def sign_contract(contract_id):
 @app.route('/service-worker.js')
 def service_worker():
     return send_from_directory('static', 'service-worker.js')
+# --- TEMP SEED START ---
+# Temporary seed endpoint. Remove after use.
+import os
+from datetime import datetime
+@app.route('/_seed_site')
+def _seed_site():
+    token = os.environ.get('SEED_TOKEN', '')
+    req = request.args.get('token', '')
+    if not token or req != token:
+        return ('Forbidden', 403)
+    with app.app_context():
+        db.create_all()
+        admin_email = 'admin@pcrrg.local'
+        admin = User.query.filter_by(email=admin_email).first()
+        if not admin:
+            admin = User(email=admin_email, name='Admin User', role='admin')
+            admin.set_password('ChangeMeNow123!')
+            db.session.add(admin)
+            db.session.commit()
+        if Job.query.count() == 0:
+            job = Job(job_number='PCRRG-1001', title='Sample Job', client_name='Acme Corp', address='123 Main St', status='open', admin_id=admin.id, assigned_to_id=admin.id, created_at=datetime.utcnow())
+            db.session.add(job)
+            db.session.commit()
+    return ('Seeded', 200)
+# --- TEMP SEED END ---

@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'pcrrg-cache-v1';
+const CACHE_NAME = 'pcrrg-cache-v1';
 const URLS_TO_CACHE = ['/', '/login', '/static/manifest.json'];
 
 self.addEventListener('install', e => {
