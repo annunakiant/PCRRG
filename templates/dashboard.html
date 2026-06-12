@@ -11,11 +11,11 @@
       <h3>{{ job.job_number }} - {{ job.title }}
         <span class="badge status-{{ job.status }}">{{ job.status }}</span>
       </h3>
-      <p>{{ job.client_name }} â€” {{ job.address }}</p>
+      <p>{{ job.client_name }} — {{ job.address }}</p>
       <p><a href="{{ url_for('view_job', job_id=job.id) }}">Open</a></p>
     </div>
   {% else %}
     <p>No jobs yet.</p>
   {% endfor %}
 </div>
-{% endblock %}
+{% endblock %}
