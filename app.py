@@ -559,3 +559,51 @@ def sign_contract(contract_id):
 def service_worker():
     return send_from_directory('static', 'service-worker.js')
 
+# --- TEMP SEED START ---
+# Temporary seed endpoint. Remove after use.
+import os
+from datetime import datetime
+@app.route('/_seed_site')
+def _seed_site():
+    token = os.environ.get('SEED_TOKEN', '')
+    req = request.args.get('token', '')
+    if not token or req != token:
+        return ('Forbidden', 403)
+    with app.app_context():
+        db.create_all()
+        # create admin
+        admin_email = 'admin@pcrrg.local'
+        admin = User.query.filter_by(email=admin_email).first()
+        if not admin:
+            admin = User(email=admin_email, name='Admin User', role='admin')
+            admin.set_password('ChangeMeNow123!')
+            db.session.add(admin)
+            db.session.commit()
+        # create sample job if none
+        if Job.query.count() == 0:
+            job = Job(job_number='PCRRG-1001', title='Sample Job', client_name='Acme Corp', address='123 Main St', status='open', service_type='Water Mitigation', admin_id=admin.id, assigned_to_id=admin.id, created_at=datetime.utcnow())
+            db.session.add(job)
+            db.session.commit()
+            # create a photo record
+            try:
+                p = Photo(job_id=job.id, filename='placeholder.jpg', category='Before', uploaded_at=datetime.utcnow())
+                db.session.add(p)
+                db.session.commit()
+            except Exception:
+                pass
+            # create a checklist record (if model exists)
+            try:
+                c = JobChecklist(job_id=job.id, title='Initial Assessment', items='Inspect;Dry;Document')
+                db.session.add(c)
+                db.session.commit()
+            except Exception:
+                pass
+            # create a contract record (if model exists)
+            try:
+                ctr = Contract(job_id=job.id, filename='placeholder_contract.pdf', uploaded_at=datetime.utcnow())
+                db.session.add(ctr)
+                db.session.commit()
+            except Exception:
+                pass
+    return ('Seeded', 200)
+# --- TEMP SEED END ---
