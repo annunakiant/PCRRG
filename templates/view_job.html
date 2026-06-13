@@ -1,1 +1,64 @@
-﻿<!-- TODO: Add full HTML later -->
+﻿{% extends 'base.html' %}
+{% block content %}
+<div class='container mt-4'>
+  <div class='d-flex justify-content-between align-items-center mb-3'>
+    <h1 class='h4'>{{ job.job_number or 'Job' }} — {{ job.title or 'Untitled' }}</h1>
+    <div>
+      <a href='{{ url_for("dashboard") }}' class='btn btn-sm btn-outline-secondary'>Back</a>
+      {% if is_admin() %}<a href='{{ url_for("edit_job", job_id=job.id) }}' class='btn btn-sm btn-primary ms-2'>Edit</a>{% endif %}
+    </div>
+  </div>
+  <div class='row'>
+    <div class='col-md-8'>
+      <div class='card mb-3'><div class='card-body'>
+        <h5>{{ job.client_name or 'Client' }}</h5>
+        <p>{{ job.address or 'Address not provided' }}</p>
+        <p><strong>Service:</strong> {{ job.service_type or 'General' }}</p>
+        <p><strong>Status:</strong> {{ job.status or '—' }}</p>
+        <p><small class='text-muted'>Created {{ job.created_at.strftime('%Y-%m-%d') if job.created_at else '—' }}</small></p>
+      </div></div>
+
+      <div class='card mb-3'><div class='card-header'>Photos</div><div class='card-body'>
+        {% if job.photos and job.photos|length %}
+          <div class='row g-2'>
+            {% for p in job.photos %}
+              <div class='col-6 col-md-4'>
+                <div class='card'>
+                  <img src='{{ url_for("static", filename="uploads/" ~ (p.filename or "placeholder.jpg")) }}' class='card-img-top' alt='photo'>
+                  <div class='card-body p-2'><small class='text-muted'>{{ p.category or "" }}</small></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class='text-muted'>No photos uploaded yet.</p>
+        {% endif %}
+      </div></div>
+
+      <div class='card mb-3'><div class='card-header'>Checklists</div><div class='card-body'>
+        {% if job.checklists and job.checklists|length %}
+          <ul class='list-group'>
+            {% for c in job.checklists %}<li class='list-group-item'>{{ c.title or 'Checklist' }}</li>{% endfor %}
+          </ul>
+        {% else %}
+          <p class='text-muted'>No checklists attached.</p>
+        {% endif %}
+      </div></div>
+    </div>
+
+    <div class='col-md-4'>
+      <div class='card mb-3'><div class='card-body'>
+        <h6>Quick actions</h6>
+        <a href='{{ url_for("upload_photo", job_id=job.id) }}' class='btn btn-sm btn-outline-primary w-100 mb-2'>Upload Photo</a>
+        <a href='{{ url_for("create_contract", job_id=job.id) }}' class='btn btn-sm btn-outline-secondary w-100'>Upload Contract</a>
+      </div></div>
+
+      <div class='card'><div class='card-body'>
+        <h6>Assigned</h6>
+        <p class='mb-0'>{{ job.assigned_to.name if job.assigned_to else 'Unassigned' }}</p>
+        <small class='text-muted'>Admin: {{ job.admin.name if job.admin else '—' }}</small>
+      </div></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
